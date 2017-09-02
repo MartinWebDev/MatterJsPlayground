@@ -8,6 +8,7 @@ var world;
 var ground;
 
 var boxes = [];
+var plinks = [];
 
 function setup() {
     createCanvas(400, 400);
@@ -16,6 +17,17 @@ function setup() {
     world = engine.world;
 
     ground = Bodies.rectangle(width / 2, 390, 400, 20, { isStatic: true });
+
+    for (var i = 0; i < 5; i++) {
+        for (var j = 0; j < 5; j++) {
+            let y = ((height / 5) * i) + 20;
+            let x = ((width / 5) * j) + (i % 2 == 0 ? 20 : 60);
+            var newPlink = Bodies.circle(x, y, 10, { isStatic: true });
+            plinks.push(newPlink);
+
+            World.addBody(world, newPlink);
+        }
+    }
 
     World.addBody(world, ground);
 
@@ -43,5 +55,11 @@ function draw() {
         rotate(boxes[i].angle);
         rect(0, 0, 40, 40);
         pop();
+    }
+
+    fill(255);
+    noStroke();
+    for (var i = 0; i < plinks.length; i++) {
+        ellipse(plinks[i].position.x, plinks[i].position.y, 10);
     }
 }
