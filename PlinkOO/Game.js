@@ -29,7 +29,18 @@ var Game = Game || {};
         self.roof = Bodies.rectangle(self.width / 2, 10, self.width, 40, { isStatic: true, restitution: 1, friction: 0 });
         self.leftWall = Bodies.rectangle(10, self.height / 2, 40, self.height, { isStatic: true, restitution: 1, friction: 0 });
         self.rightWall = Bodies.rectangle(self.width - 10, self.height / 2, 40, self.height, { isStatic: true, restitution: 1, friction: 0 });
+
         self.box = Bodies.rectangle(self.width / 2, self.height / 2, 20, 20, { restitution: 1, friction: 0 });
+        self.box.frictionAir = 0;
+
+        self.boxes = [];
+
+        for (var i = 0; i < 100; i++) {
+            self.boxes.push(Bodies.rectangle(Math.random() * self.width, Math.random() * self.height, 20, 20, { restitution: 1, friction: 0 }));
+            self.boxes[i].frictionAir = 0;
+
+            World.addBody(self.world, self.boxes[i]);
+        }
 
         // Add bodies to world
         World.addBody(self.world, self.ground);
@@ -45,8 +56,15 @@ var Game = Game || {};
                 p.setup = function () {
                     p.createCanvas(self.width, self.height);
 
-                    Matter.Body.applyForce(self.box, { x: 0, y: 0 }, { x: -0.01, y: -0.01 });
-                    Body.rotate(self.box, 20);
+                    Matter.Body.applyForce(self.box, { x: 0, y: 0 }, { x: (Math.random() - 0.5) / 500, y: (Math.random() - 0.5) / 500 });
+                    Matter.Body.setAngularVelocity(self.box, Math.random() / 10);
+                    Body.rotate(self.box, Math.random() * 360);
+
+                    for (var i = 0; i < self.boxes.length; i++) {
+                        Matter.Body.applyForce(self.boxes[i], { x: 0, y: 0 }, { x: (Math.random() - 0.5) / 500, y: (Math.random() - 0.5) / 500 });
+                        Matter.Body.setAngularVelocity(self.boxes[i], Math.random() / 100);
+                        Body.rotate(self.boxes[i], Math.random() * 360);
+                    }
 
                     //Engine.run(self.engine);
                 };
@@ -81,9 +99,21 @@ var Game = Game || {};
                     p.rect(self.rightWall.position.x, self.rightWall.position.y, 40, p.width);
 
                     // Draw box
+                    p.push();
                     p.translate(self.box.position.x, self.box.position.y);
                     p.rotate(self.box.angle);
                     p.rect(0, 0, 20, 20);
+                    p.pop();
+
+                    for (var i = 0; i < self.boxes.length; i++) {
+                        p.push();
+                        p.translate(self.boxes[i].position.x, self.boxes[i].position.y);
+                        p.rotate(self.boxes[i].angle);
+                        p.rect(0, 0, 20, 20);
+                        p.stroke(255, 0, 0, 200);
+                        p.line(0, 0, 0, 10);
+                        p.pop();
+                    }
                 };
             };
 
