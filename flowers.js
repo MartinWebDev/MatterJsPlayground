@@ -54,8 +54,8 @@ Flower.prototype.show = function () {
         if (this.growFlower) {
             push();
 
-            let petalControlX = 2;
-            let petalControlY = 3;
+            var petalControlX = 2;
+            var petalControlY = 3;
 
             //noStroke();
             stroke(255);
@@ -101,7 +101,7 @@ function setup() {
     }
 }
 
-function mousePressed() {
+function mouseClicked() {
     flowers.push(new Flower(mouseX, mouseY));
 }
 
