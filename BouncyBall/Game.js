@@ -65,11 +65,11 @@ var Game = Game || {};
                 };
 
                 p.mouseClicked = function () {
-                    Body.setAngularVelocity(self.ball1, 1);
+                    //Body.setAngularVelocity(self.ball1, 1);
                 }
 
                 p.keyReleased = function () {
-                    if (p.keyCode = 38) {
+                    if (p.keyCode == 38 || p.keyCode == 32) {
                         let power = p.constrain(1 * self.potentialForceMultiplier, 0.005, 0.05);
 
                         console.log(`Potential Energy: ${self.potentialForceMultiplier}`);
@@ -85,6 +85,31 @@ var Game = Game || {};
                     Engine.update(self.engine);
 
                     p.background(self.bgColor);
+
+                    // TEMP TEST
+                    if (p.mouseIsPressed && self.ball1.speed < 30) {
+                        Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
+                    }
+                    if (p.keyIsPressed && self.ball1.speed < 30) {
+                        switch (p.keyCode) {
+                            case 37: // Left arrow
+                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(-0.001, 0));
+                                break;
+                            case 38: // Up
+                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, -0.001));
+                                break;
+                            case 39: // Right
+                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
+                                break;
+                            case 40:  // Down
+                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, 0.001));
+                                break;
+                        }
+                    }
+                    p.fill(200);
+                    p.noStroke();
+                    p.text(`Speed: ${Math.floor(self.ball1.speed * 100) / 100}`, 5, 20);
+                    p.text(`Power: ${self.potentialForceMultiplier}`, 5, 40);
 
                     // Framecount
                     if (self.showFps) {
@@ -131,9 +156,11 @@ var Game = Game || {};
 
                         p.noStroke();
                         p.fill(100);
-                        for (var j = 100; j < self.gameHeight; j += 500) {
-                            p.text(i.toString(), i, j);
-                        }
+                        p.text(i.toString(), i, (p.height / 2) - self.globalOffsetY); // This version maintains a static height
+                        // This version add repeated text at set heights
+                        //for (var j = 100; j < self.gameHeight; j += 500) {
+                        //p.text(i.toString(), i, j);
+                        //}
                     }
 
                     /////////////////////////
