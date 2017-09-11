@@ -4,6 +4,20 @@ let World = Matter.World;
 let Bodies = Matter.Bodies;
 let Body = Matter.Body;
 let Vector = Matter.Vector;
+let Vertices = Matter.Vertices;
+
+/**
+ * TODO list
+ *      - Firstly, the whole thing needs to be broken down into classes and objects. What started out as a random experiment has grown to the point
+ *        where the different components should be separated and independently managed
+ *      - I was thinking to build this into some sort of ESL game for Keyword (and others, perhaps can make some extra money from my games and planning system)
+ *        Ideas maybe include:
+ *          - Have 2 teams, in order to build power for their ball, they must answer questions.
+ *            Each questions gets them a percentage of potential power to launch their ball. Furthest team wins
+ *      - I am adding a "bucket" idea for a while, to experiment with landing the ball inside it. Perhaps this can be integrated into the game? Otherwise, delete it later
+ *      - Since the current key press system can only handle a single button, instead change to have a true/false state for each action (up, down, etc),
+ *        Have it set to true on key press, then false on release. This should allow it to handle multiple key presses at once. 
+ */
 
 // Namespace "Game"
 var Game = Game || {};
@@ -45,6 +59,17 @@ var Game = Game || {};
         // self.ball1 = Bodies.circle(self.width / 2, self.height / 2, 10, { restitution: 0.8 });
         self.ball1 = Bodies.circle(45, self.gameHeight - 45, 10, { restitution: 0.8 });
         World.addBody(self.world, self.ball1);
+
+        // Random "bucket"
+        let verts = [
+            { x: -10, y: -10 },
+            { x: 10, y: -10 },
+            { x: 10, y: 10 },
+            { x: -10, y: 10 }
+        ];
+        self.bucket = Bodies.fromVertices(80, self.gameHeight - 80, verts, { isStatic: false });
+        World.addBody(self.world, self.bucket);
+        console.log(self.bucket);
 
         /////////////////
         // Game window //
@@ -134,6 +159,17 @@ var Game = Game || {};
                     self.globalOffsetY = p.constrain(self.globalOffsetY, -(self.gameHeight - p.height), 0);
                     p.translate(self.globalOffsetX, self.globalOffsetY);
 
+                    // TEMP BUCKET TEST
+                    let verts = self.bucket.vertices;
+                    p.stroke(255);
+                    p.strokeWeight(1);
+                    p.noFill();
+                    p.beginShape();
+                    for (let i = 0; i < verts.length; i++) {
+                        p.vertex(verts[i].x, verts[i].y);
+                    }
+                    p.endShape(p.CLOSE);
+
                     // Settings for all drawables
                     p.noFill();
                     p.stroke(255);
@@ -157,7 +193,7 @@ var Game = Game || {};
                         p.noStroke();
                         p.fill(100);
                         p.text(i.toString(), i, (p.height / 2) - self.globalOffsetY); // This version maintains a static height
-                        // This version add repeated text at set heights
+                        // This version add repeated text at set heights - WARNING! Too many of these causes a huge drop in FPS!
                         //for (var j = 100; j < self.gameHeight; j += 500) {
                         //p.text(i.toString(), i, j);
                         //}
@@ -167,14 +203,14 @@ var Game = Game || {};
                     // Draw related events //
                     /////////////////////////
                     if (p.keyIsPressed && p.keyCode == 32) {
-                        self.potentialForceMultiplier += 0.0001;
+                        self.potentialForceMultiplier += 0.0005;
                     }
 
                     // Draw line to show potential force
                     if (self.potentialForceMultiplier > 0) {
                         let lineStart = new p5.Vector(self.ball1.position.x, self.ball1.position.y);
                         let subVec = new p5.Vector(1 * self.potentialForceMultiplier * 2000, -(1 * self.potentialForceMultiplier * 2000));
-                        subVec.setMag(p.constrain(subVec.mag(), 1, 50));
+                        subVec.setMag(p.constrain(subVec.mag(), 1, 100) * 0.5); // Calc of potential power and this line need to be synced better
                         let lineEnd = p5.Vector.sub(lineStart, subVec);
                         p.stroke(0, 255, 0);
                         p.strokeWeight(2);
