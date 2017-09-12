@@ -22,6 +22,8 @@ let Vertices = Matter.Vertices;
 // Namespace "Game"
 var Game = Game || {};
 
+var verts;
+
 (function (Game) {
     Game.BouncyBall = function () {
         let self = this;
@@ -57,15 +59,20 @@ var Game = Game || {};
         // Create and add bodies for this game only below this line //
         //////////////////////////////////////////////////////////////
         // self.ball1 = Bodies.circle(self.width / 2, self.height / 2, 10, { restitution: 0.8 });
-        self.ball1 = Bodies.circle(45, self.gameHeight - 45, 10, { restitution: 0.8 });
+        //self.ball1 = Bodies.circle(45, self.gameHeight - 45, 10, { restitution: 0.8 });
+        self.ball1 = Bodies.circle(80, self.gameHeight - 150, 10, { restitution: 0.8 });
         World.addBody(self.world, self.ball1);
 
         // Random "bucket"
-        let verts = [
-            { x: -10, y: -10 },
-            { x: 10, y: -10 },
-            { x: 10, y: 10 },
-            { x: -10, y: 10 }
+        /*let*/ verts = [
+            { x: -20, y: -20 },
+            { x: -16, y: -20 },
+            { x: -12, y: 16 },
+            { x: 12, y: 16 },
+            { x: 16, y: -20 },
+            { x: 20, y: -20 },
+            { x: 16, y: 20 },
+            { x: -16, y: 20 }
         ];
         self.bucket = Bodies.fromVertices(80, self.gameHeight - 80, verts, { isStatic: false });
         World.addBody(self.world, self.bucket);
@@ -96,7 +103,7 @@ var Game = Game || {};
                 }
 
                 p.keyReleased = function () {
-                    if (p.keyCode == 38 || p.keyCode == 32) {
+                    if (p.keyCode == 32) {
                         let power = p.constrain(1 * self.potentialForceMultiplier, 0.005, 0.05);
 
                         console.log(`Potential Energy: ${self.potentialForceMultiplier}`);
@@ -162,15 +169,20 @@ var Game = Game || {};
                     p.translate(self.globalOffsetX, self.globalOffsetY);
 
                     // TEMP BUCKET TEST
-                    let verts = self.bucket.vertices;
+                    //let verts = self.bucket.vertices;
                     p.stroke(255);
                     p.strokeWeight(1);
                     p.noFill();
+                    p.push();
+                    p.translate(self.bucket.position.x, self.bucket.position.y);
+                    p.rotate(self.bucket.angle);
                     p.beginShape();
                     for (let i = 0; i < verts.length; i++) {
                         p.vertex(verts[i].x, verts[i].y);
                     }
+                    //p.endShape();
                     p.endShape(p.CLOSE);
+                    p.pop()
 
                     // Settings for all drawables
                     p.noFill();
@@ -222,6 +234,9 @@ var Game = Game || {};
                     ////////////////////////////////////////////////
                     // Draw game specific objects below this line //
                     ////////////////////////////////////////////////
+                    p.stroke(255);
+                    p.strokeWeight(1);
+                    p.line(self.ball1.position.x, self.ball1.position.y, self.ball1.positionPrev.x, self.ball1.positionPrev.y);
                     p.noFill();
                     p.push();
                     p.translate(self.ball1.position.x, self.ball1.position.y);

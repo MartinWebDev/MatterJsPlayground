@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "matter-js": "^0.13.0",
-    "p5": "^0.5.14"
+    "p5": "^0.5.14",
+    "poly-decomp": "^0.2.1"
   }
 }
