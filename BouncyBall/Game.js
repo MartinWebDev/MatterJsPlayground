@@ -105,9 +105,11 @@ var verts;
                 p.keyReleased = function () {
                     if (p.keyCode == 32) {
                         let power = p.constrain(1 * self.potentialForceMultiplier, 0.005, 0.05);
+                        let maxPower = p.map(power, 0.005, 0.05, 0, 100); // Map to a percentage, this can be useful for tuning the potential power to the line on screen
 
                         console.log(`Potential Energy: ${self.potentialForceMultiplier}`);
                         console.log(`Constrained Energy: ${power}`);
+                        console.log(`Percentage Energy: ${maxPower}`);
 
                         Body.applyForce(self.ball1, self.ball1.position, Vector.create(power, -(power)));
                         self.potentialForceMultiplier = 0;
