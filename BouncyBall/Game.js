@@ -91,6 +91,8 @@ var Game = Game || {};
 
                 p.mouseClicked = function () {
                     //Body.setAngularVelocity(self.ball1, 1);
+                    // TEST replace the body to track to test moving view. Real version will want nicely animated, but just ensure it actually works
+                    //self.bodyToTrack = self.rightWall;
                 }
 
                 p.keyReleased = function () {
