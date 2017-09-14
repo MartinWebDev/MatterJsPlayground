@@ -58,8 +58,6 @@ var verts;
         //////////////////////////////////////////////////////////////
         // Create and add bodies for this game only below this line //
         //////////////////////////////////////////////////////////////
-        // self.ball1 = Bodies.circle(self.width / 2, self.height / 2, 10, { restitution: 0.8 });
-        //self.ball1 = Bodies.circle(45, self.gameHeight - 45, 10, { restitution: 0.8 });
         self.ball1 = Bodies.circle(80, self.gameHeight - 150, 10, { restitution: 0.8 });
         World.addBody(self.world, self.ball1);
 
@@ -111,7 +109,39 @@ var verts;
                     //self.bodyToTrack = self.bodyToTrack == self.bucket ? self.ball1 : self.bucket;
                 }
 
+                p.keyPressed = function () {
+                    switch (p.keyCode) {
+                        case 37: // Left arrow
+                            self.controlInfo.LR = true;
+                            break;
+                        case 38: // Up
+                            self.controlInfo.UR = true;
+                            break;
+                        case 39: // Right
+                            self.controlInfo.RR = true;
+                            break;
+                        case 40:  // Down
+                            self.controlInfo.DR = true;
+                            break;
+                    }
+                }
+
                 p.keyReleased = function () {
+                    switch (p.keyCode) {
+                        case 37: // Left arrow
+                            self.controlInfo.LR = false;
+                            break;
+                        case 38: // Up
+                            self.controlInfo.UR = false;
+                            break;
+                        case 39: // Right
+                            self.controlInfo.RR = false;
+                            break;
+                        case 40:  // Down
+                            self.controlInfo.DR = false;
+                            break;
+                    }
+
                     if (p.keyCode == 32) {
                         let power = p.constrain(1 * self.potentialForceMultiplier, 0.005, 0.05);
                         let maxPower = p.map(power, 0.005, 0.05, 0, 100); // Map to a percentage, this can be useful for tuning the potential power to the line on screen
@@ -135,22 +165,18 @@ var verts;
                     if (p.mouseIsPressed && self.ball1.speed < 30) {
                         //Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
                     }
-                    if (p.keyIsPressed && self.ball1.speed < 30) {
-                        switch (p.keyCode) {
-                            case 37: // Left arrow
-                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(-0.001, 0));
-                                break;
-                            case 38: // Up
-                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, -0.001));
-                                break;
-                            case 39: // Right
-                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
-                                break;
-                            case 40:  // Down
-                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, 0.001));
-                                break;
-                        }
+
+                    if (self.ball1.speed < 30) {
+                        if (self.controlInfo.LR) // Left arrow
+                            Body.applyForce(self.ball1, self.ball1.position, Vector.create(-0.001, 0));
+                        if (self.controlInfo.UR) // Up
+                            Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, -0.001));
+                        if (self.controlInfo.RR) // Right
+                            Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
+                        if (self.controlInfo.DR)  // Down
+                            Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, 0.001));
                     }
+
                     p.fill(200);
                     p.noStroke();
                     p.text(`Speed: ${Math.floor(self.ball1.speed * 100) / 100}`, 5, 20);
