@@ -6,7 +6,6 @@ function Flower(x, y) {
     this.growth = 0;
 
     this.petals = Math.floor(random(5, 8));
-    //this.rotationAmount = (Math.PI * 2) / this.petals;
     this.rotationAmount = 360 / this.petals;
 
     this.colors = ["#FF0000", "#00FF00", "#0000FF", "#00FFFF", "#FF00FF", "#FFFF00"];

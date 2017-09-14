@@ -63,6 +63,15 @@ var verts;
         self.ball1 = Bodies.circle(80, self.gameHeight - 150, 10, { restitution: 0.8 });
         World.addBody(self.world, self.ball1);
 
+        // Game controls
+        self.controlInfo = {
+            LR: false,
+            RR: false,
+            UR: false,
+            DR: false,
+            SPACE: false
+        };
+
         // Random "bucket"
         /*let*/ verts = [
             { x: -20, y: -20 },
@@ -99,7 +108,7 @@ var verts;
                 p.mouseClicked = function () {
                     //Body.setAngularVelocity(self.ball1, 1);
                     // TEST replace the body to track to test moving view. Real version will want nicely animated, but just ensure it actually works
-                    //self.bodyToTrack = self.rightWall;
+                    //self.bodyToTrack = self.bodyToTrack == self.bucket ? self.ball1 : self.bucket;
                 }
 
                 p.keyReleased = function () {
@@ -124,7 +133,7 @@ var verts;
 
                     // TEMP TEST
                     if (p.mouseIsPressed && self.ball1.speed < 30) {
-                        Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
+                        //Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
                     }
                     if (p.keyIsPressed && self.ball1.speed < 30) {
                         switch (p.keyCode) {
@@ -160,15 +169,35 @@ var verts;
 
                     // Screen Tracking for games larger than the canvas window
                     // Monitor tracked body and adjust global offset values
-                    if (self.bodyToTrack.position.x > self.width / 2) {
+                    if (self.bodyToTrack.position.x > self.width / 2)
                         self.globalOffsetX = 0 - self.bodyToTrack.position.x + self.width / 2; // 0 = origin point
-                    }
-                    if (self.bodyToTrack.position.y > self.height / 2) {
+                    else
+                        self.globalOffsetX = 0;
+
+                    if (self.bodyToTrack.position.y > self.height / 2)
                         self.globalOffsetY = 0 - self.bodyToTrack.position.y + self.height / 2; // 0 = origin point
-                    }
+                    else
+                        self.globalOffsetY = 0;
+
                     self.globalOffsetX = p.constrain(self.globalOffsetX, -(self.gameWidth - p.width), 0);
                     self.globalOffsetY = p.constrain(self.globalOffsetY, -(self.gameHeight - p.height), 0);
                     p.translate(self.globalOffsetX, self.globalOffsetY);
+
+                    // TEMP TEST
+                    if (p.mouseIsPressed && self.ball1.speed < 30) {
+                        //Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
+                        // TEST draw a line from ball to mouse, constrain it, then turn it into a force on the ball
+                        let mousePos = new p5.Vector(p.mouseX - self.globalOffsetX, p.mouseY - self.globalOffsetY);
+                        let ballPos = new p5.Vector(self.ball1.position.x, self.ball1.position.y);
+                        let gap = mousePos.sub(ballPos);
+                        gap.setMag(p.constrain(gap.mag(), 1, 100) * 0.5);
+                        let lineEnd = p5.Vector.add(ballPos, gap);
+
+                        p.stroke(255, 0, 0);
+                        p.strokeWeight(2);
+                        p.line(ballPos.x, ballPos.y, lineEnd.x, lineEnd.y);
+                        // TODO Convert this new potential into our actual potential power equation and replace the space bar mechanic
+                    }
 
                     // TEMP BUCKET TEST
                     //let verts = self.bucket.vertices;
