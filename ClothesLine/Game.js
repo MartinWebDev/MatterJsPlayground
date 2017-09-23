@@ -23,10 +23,8 @@ let Events = Matter.Events;
 // Namespace "Game"
 var Game = Game || {};
 
-var verts;
-
 (function (Game) {
-    Game.BouncyBall = function () {
+    Game.ClothesLine = function () {
         let self = this;
 
         // Settings for p5js
@@ -34,8 +32,8 @@ var verts;
         self.height = 400;
         self.bgColor = 50;
 
-        self.gameWidth = 10000;
-        self.gameHeight = 5000;
+        self.gameWidth = 800;
+        self.gameHeight = 400;
 
         // MatterJs setup
         self.engine = Engine.create();
@@ -45,10 +43,10 @@ var verts;
         self.showFps = true;
 
         // Create boundary bodies
-        self.ground = Bodies.rectangle(self.gameWidth / 2, self.gameHeight - 10, self.gameWidth, 40, { isStatic: true, restitution: 1, friction: 0, label: "Ground" });
-        self.roof = Bodies.rectangle(self.gameWidth / 2, 10, self.gameWidth, 40, { isStatic: true, restitution: 1, friction: 0, label: "Roof" });
-        self.leftWall = Bodies.rectangle(10, self.gameHeight / 2, 40, self.gameHeight, { isStatic: true, restitution: 1, friction: 0, label: "Left wall" });
-        self.rightWall = Bodies.rectangle(self.gameWidth - 10, self.gameHeight / 2, 40, self.gameHeight, { isStatic: true, restitution: 1, friction: 0, label: "Right wall" });
+        self.ground = Bodies.rectangle(self.gameWidth / 2, self.gameHeight - 20, self.gameWidth, 40, { isStatic: true, restitution: 1, friction: 0, label: "Ground" });
+        self.roof = Bodies.rectangle(self.gameWidth / 2, 20, self.gameWidth, 40, { isStatic: true, restitution: 1, friction: 0, label: "Roof" });
+        self.leftWall = Bodies.rectangle(20, self.gameHeight / 2, 40, self.gameHeight, { isStatic: true, restitution: 1, friction: 0, label: "Left wall" });
+        self.rightWall = Bodies.rectangle(self.gameWidth - 20, self.gameHeight / 2, 40, self.gameHeight, { isStatic: true, restitution: 1, friction: 0, label: "Right wall" });
 
         // Add boundary bodies to world
         World.addBody(self.world, self.ground);
@@ -62,6 +60,13 @@ var verts;
         self.ball1 = Bodies.circle(80, self.gameHeight - 150, 10, { restitution: 0.8, label: "Ball" });
         World.addBody(self.world, self.ball1);
 
+        self.clothesPoleLeft = Bodies.rectangle(300, self.gameHeight - 140, 10, 200, { isStatic: true, label: "ClothesPoleLeft", isSensor: true });
+        self.clothesPoleRight = Bodies.rectangle(700, self.gameHeight - 140, 10, 200, { isStatic: true, label: "ClothesPoleLeft", isSensor: true });
+        self.clothesLine = Bodies.rectangle(700 - (700 - 300) / 2, 180, 700 - 300, 5, { isStatic: true, label: "ClothesLine", isSensor: true });
+        World.addBody(self.world, self.clothesPoleLeft);
+        World.addBody(self.world, self.clothesPoleRight);
+        World.addBody(self.world, self.clothesLine);
+
         // Game controls
         self.controlInfo = {
             LR: false,
@@ -70,21 +75,6 @@ var verts;
             DR: false,
             SPACE: false
         };
-
-        // Random "bucket"
-        /*let*/ verts = [
-            { x: -20, y: -20 },
-            { x: -16, y: -20 },
-            { x: -12, y: 16 },
-            { x: 12, y: 16 },
-            { x: 16, y: -20 },
-            { x: 20, y: -20 },
-            { x: 16, y: 20 },
-            { x: -16, y: 20 }
-        ];
-        self.bucket = Bodies.fromVertices(80, self.gameHeight - 80, verts, { isStatic: false, label: "Bucket" });
-        World.addBody(self.world, self.bucket);
-        //console.log(self.bucket);
 
         /////////////////
         // Game window //
@@ -138,9 +128,7 @@ var verts;
                 };
 
                 p.mouseClicked = function () {
-                    //Body.setAngularVelocity(self.ball1, 1);
-                    // TEST replace the body to track to test moving view. Real version will want nicely animated, but just ensure it actually works
-                    //self.bodyToTrack = self.bodyToTrack == self.bucket ? self.ball1 : self.bucket;
+
                 }
 
                 p.keyPressed = function () {
@@ -177,7 +165,7 @@ var verts;
                     }
 
                     if (p.keyCode == 32) {
-                        let power = p.constrain(1 * self.potentialForceMultiplier, 0.005, 0.05);
+                        let power = p.constrain(1 * self.potentialForceMultiplier, 0.005, 0.015);
                         let maxPower = p.map(power, 0.005, 0.05, 0, 100); // Map to a percentage, this can be useful for tuning the potential power to the line on screen
 
                         console.log(`Potential Energy: ${self.potentialForceMultiplier}`);
@@ -211,11 +199,6 @@ var verts;
                             Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, 0.001));
                     }
 
-                    p.fill(200);
-                    p.noStroke();
-                    p.text(`Speed: ${Math.floor(self.ball1.speed * 100) / 100}`, 5, 20);
-                    p.text(`Power: ${self.potentialForceMultiplier}`, 5, 40);
-
                     // Framecount
                     if (self.showFps) {
                         let frameRate = `FPS: ${p.frameRate().toFixed(2)}`;
@@ -243,38 +226,6 @@ var verts;
                     self.globalOffsetY = p.constrain(self.globalOffsetY, -(self.gameHeight - p.height), 0);
                     p.translate(self.globalOffsetX, self.globalOffsetY);
 
-                    // TEMP TEST
-                    if (p.mouseIsPressed && self.ball1.speed < 30) {
-                        //Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
-                        // TEST draw a line from ball to mouse, constrain it, then turn it into a force on the ball
-                        let mousePos = new p5.Vector(p.mouseX - self.globalOffsetX, p.mouseY - self.globalOffsetY);
-                        let ballPos = new p5.Vector(self.ball1.position.x, self.ball1.position.y);
-                        let gap = mousePos.sub(ballPos);
-                        gap.setMag(p.constrain(gap.mag(), 1, 100) * 0.5);
-                        let lineEnd = p5.Vector.add(ballPos, gap);
-
-                        p.stroke(255, 0, 0);
-                        p.strokeWeight(2);
-                        p.line(ballPos.x, ballPos.y, lineEnd.x, lineEnd.y);
-                        // TODO Convert this new potential into our actual potential power equation and replace the space bar mechanic
-                    }
-
-                    // TEMP BUCKET TEST
-                    //let verts = self.bucket.vertices;
-                    p.stroke(255);
-                    p.strokeWeight(1);
-                    p.noFill();
-                    p.push();
-                    p.translate(self.bucket.position.x, self.bucket.position.y);
-                    p.rotate(self.bucket.angle);
-                    p.beginShape();
-                    for (let i = 0; i < verts.length; i++) {
-                        p.vertex(verts[i].x, verts[i].y);
-                    }
-                    //p.endShape();
-                    p.endShape(p.CLOSE);
-                    p.pop()
-
                     // Settings for all drawables
                     p.noFill();
                     p.stroke(255);
@@ -287,22 +238,6 @@ var verts;
                     p.rect(self.roof.position.x, self.roof.position.y, self.gameWidth, 40);
                     p.rect(self.leftWall.position.x, self.leftWall.position.y, 40, self.gameHeight);
                     p.rect(self.rightWall.position.x, self.rightWall.position.y, 40, self.gameHeight);
-
-                    // Draw some distance lines
-                    for (var i = 1000; i < self.gameWidth; i += 1000) {
-                        // Draw a vertical line every 1000 pixels
-                        p.stroke(100);
-                        p.strokeWeight(1);
-                        p.line(i, 0, i, self.gameHeight);
-
-                        p.noStroke();
-                        p.fill(100);
-                        p.text(i.toString(), i, (p.height / 2) - self.globalOffsetY); // This version maintains a static height
-                        // This version add repeated text at set heights - WARNING! Too many of these causes a huge drop in FPS!
-                        //for (var j = 100; j < self.gameHeight; j += 500) {
-                        //p.text(i.toString(), i, j);
-                        //}
-                    }
 
                     /////////////////////////
                     // Draw related events //
@@ -325,19 +260,41 @@ var verts;
                     ////////////////////////////////////////////////
                     // Draw game specific objects below this line //
                     ////////////////////////////////////////////////
-                    p.stroke(255);
-                    p.strokeWeight(1);
-                    p.line(self.ball1.position.x, self.ball1.position.y, self.ball1.positionPrev.x, self.ball1.positionPrev.y);
-                    p.noFill();
-                    p.push();
-                    p.translate(self.ball1.position.x, self.ball1.position.y);
-                    p.rotate(self.ball1.angle);
-                    p.stroke(255);
-                    p.strokeWeight(1);
-                    p.ellipse(0, 0, 20, 20); // TODO: Do not use static values for radius here
-                    p.stroke(255, 0, 0);
-                    p.line(0, 0, 10, 0); // Draw little line to show angle
-                    p.pop();
+                    (drawBall = function () {
+                        p.push();
+                        p.translate(self.ball1.position.x, self.ball1.position.y);
+                        p.rotate(self.ball1.angle);
+                        p.noStroke();
+                        p.fill(180, 30, 170);
+                        p.ellipse(0, 0, 20, 20); // TODO: Do not use static values for radius here
+                        p.pop();
+                    })();
+
+                    (drawClothesPoles = function () {
+                        p.push();
+                        p.translate(self.clothesPoleLeft.position.x, self.clothesPoleLeft.position.y);
+                        p.rotate(self.clothesPoleLeft.angle);
+                        p.noStroke();
+                        p.fill(180);
+                        p.rect(0, 0, 10, 200);
+                        p.pop();
+
+                        p.push();
+                        p.translate(self.clothesPoleRight.position.x, self.clothesPoleRight.position.y);
+                        p.rotate(self.clothesPoleRight.angle);
+                        p.noStroke();
+                        p.fill(180);
+                        p.rect(0, 0, 10, 200);
+                        p.pop();
+
+                        p.push();
+                        p.translate(self.clothesLine.position.x, self.clothesLine.position.y);
+                        p.rotate(self.clothesLine.angle);
+                        p.noStroke();
+                        p.fill(180);
+                        p.rect(0, 0, 700 - 300, 5);
+                        p.pop();
+                    })();
                 };
             };
 
