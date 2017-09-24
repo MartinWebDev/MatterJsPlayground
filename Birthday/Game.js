@@ -67,6 +67,7 @@ var Game = Game || {};
 
         self.applyPosition = Vector.create(0, 0);
         self.applyForce = Vector.create(0.000003, 0);
+        self.applyNegativeForce = Vector.create(-0.000003, 0);
 
         this.Run = function () {
             console.log("Happy birthday...");
@@ -110,6 +111,18 @@ var Game = Game || {};
                     // Draw related events //
                     /////////////////////////
                     if (p.keyIsPressed && p.keyCode == 32) {
+                        for (let i = 0; i < self.rain.length; i++) {
+                            Body.applyForce(self.rain[i], self.applyPosition, self.applyForce);
+                        }
+                    }
+
+                    if (p.keyIsPressed && p.keyCode == 37) {
+                        for (let i = 0; i < self.rain.length; i++) {
+                            Body.applyForce(self.rain[i], self.applyPosition, self.applyNegativeForce);
+                        }
+                    }
+
+                    if (p.keyIsPressed && p.keyCode == 39) {
                         for (let i = 0; i < self.rain.length; i++) {
                             Body.applyForce(self.rain[i], self.applyPosition, self.applyForce);
                         }

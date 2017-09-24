@@ -6,6 +6,8 @@ let Body = Matter.Body;
 let Vector = Matter.Vector;
 let Vertices = Matter.Vertices;
 let Events = Matter.Events;
+let Constraint = Matter.Constraint;
+let Composite = Matter.Composite;
 
 /**
  * TODO list
@@ -22,6 +24,8 @@ let Events = Matter.Events;
 
 // Namespace "Game"
 var Game = Game || {};
+
+var sock = new Sock(350, 200);
 
 (function (Game) {
     Game.ClothesLine = function () {
@@ -67,6 +71,21 @@ var Game = Game || {};
         World.addBody(self.world, self.clothesPoleRight);
         World.addBody(self.world, self.clothesLine);
 
+        // Sock test
+        self.sockBody = Bodies.fromVertices(sock.x, sock.y, sock.getVerts(), { label: "OrangeSock" });
+        World.addBody(self.world, self.sockBody);
+
+        // Test constraint between sock and clothes line
+        self.sock1Constraint = Constraint.create({
+            bodyA: self.clothesLine,
+            bodyB: self.sockBody,
+            damping: 0.1,
+            stiffness: 1,
+            length: 10,
+            pointA: { x: 0, y: 20 }
+        });
+        World.addConstraint(self.world, self.sock1Constraint);
+
         // Game controls
         self.controlInfo = {
             LR: false,
@@ -92,7 +111,9 @@ var Game = Game || {};
 
             for (let i = 0; i < pairs.length; i++) {
                 if (pairs[i].bodyA.label == "Ball" || pairs[i].bodyB.label == "Ball") {
-                    console.log("Start: ", pairs[i].collision.penetration);
+                    if (pairs[i].bodyA.label == "OrangeSock" || pairs[i].bodyB.label == "OrangeSock") {
+                        console.log("Start: ", pairs[i].collision.penetration);
+                    }
                 }
             }
         });
@@ -114,7 +135,13 @@ var Game = Game || {};
 
             for (let i = 0; i < pairs.length; i++) {
                 if (pairs[i].bodyA.label == "Ball" || pairs[i].bodyB.label == "Ball") {
-                    console.log("End: ", pairs[i].collision.penetration);
+                    if (pairs[i].bodyA.label == "OrangeSock" || pairs[i].bodyB.label == "OrangeSock") {
+                        if (Math.abs(pairs[i].collision.penetration.x) > 5) {
+                            //World.remove(self.sock1Constraint);
+                            self.sock1Constraint.stiffness = 0;
+                        }
+                        console.log("End: ", pairs[i].collision.penetration);
+                    }
                 }
             }
         });
@@ -295,6 +322,11 @@ var Game = Game || {};
                         p.rect(0, 0, 700 - 300, 5);
                         p.pop();
                     })();
+
+
+                    // TEMP TEST ONLY - DRAW SOCK
+                    sock.update(self.sockBody.position.x, self.sockBody.position.y, self.sockBody.angle);
+                    sock.render(p);
                 };
             };
 

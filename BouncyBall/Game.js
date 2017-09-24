@@ -102,7 +102,7 @@ var verts;
 
             for (let i = 0; i < pairs.length; i++) {
                 if (pairs[i].bodyA.label == "Ball" || pairs[i].bodyB.label == "Ball") {
-                    console.log("Start: ", pairs[i].collision.penetration);
+                    //console.log("Start: ", pairs[i].collision.penetration);
                 }
             }
         });
@@ -124,7 +124,7 @@ var verts;
 
             for (let i = 0; i < pairs.length; i++) {
                 if (pairs[i].bodyA.label == "Ball" || pairs[i].bodyB.label == "Ball") {
-                    console.log("End: ", pairs[i].collision.penetration);
+                    //console.log("End: ", pairs[i].collision.penetration);
                 }
             }
         });
@@ -264,16 +264,19 @@ var verts;
                     p.stroke(255);
                     p.strokeWeight(1);
                     p.noFill();
-                    p.push();
-                    p.translate(self.bucket.position.x, self.bucket.position.y);
-                    p.rotate(self.bucket.angle);
-                    p.beginShape();
-                    for (let i = 0; i < verts.length; i++) {
-                        p.vertex(verts[i].x, verts[i].y);
-                    }
-                    //p.endShape();
-                    p.endShape(p.CLOSE);
-                    p.pop()
+
+                    Game.ui.RenderVerts(p, self.bucket.position, self.bucket.angle, verts);
+
+                    // p.push();
+                    // p.translate(self.bucket.position.x, self.bucket.position.y);
+                    // p.rotate(self.bucket.angle);
+                    // p.beginShape();
+                    // for (let i = 0; i < verts.length; i++) {
+                    //     p.vertex(verts[i].x, verts[i].y);
+                    // }
+                    // //p.endShape();
+                    // p.endShape(p.CLOSE);
+                    // p.pop()
 
                     // Settings for all drawables
                     p.noFill();
