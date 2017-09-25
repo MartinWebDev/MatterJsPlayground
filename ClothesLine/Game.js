@@ -25,7 +25,13 @@ let Composite = Matter.Composite;
 // Namespace "Game"
 var Game = Game || {};
 
-var sock = new Sock(350, 200);
+var socks = [
+    new Sock(300, 200),
+    new Sock(320, 200),
+    new Sock(340, 200),
+    new Sock(360, 200),
+    new Sock(380, 200)
+];
 
 (function (Game) {
     Game.ClothesLine = function () {
@@ -72,19 +78,39 @@ var sock = new Sock(350, 200);
         World.addBody(self.world, self.clothesLine);
 
         // Sock test
-        self.sockBody = Bodies.fromVertices(sock.x, sock.y, sock.getVerts(), { label: "OrangeSock" });
-        World.addBody(self.world, self.sockBody);
+        self.sockBodies = [];
+        self.sockConstraints = []
+        self.sockComposites = [];
 
-        // Test constraint between sock and clothes line
-        self.sock1Constraint = Constraint.create({
-            bodyA: self.clothesLine,
-            bodyB: self.sockBody,
-            damping: 0.1,
-            stiffness: 1,
-            length: 10,
-            pointA: { x: 0, y: 20 }
-        });
-        World.addConstraint(self.world, self.sock1Constraint);
+        for (let i = 0; i < socks.length; i++) {
+            self.sockBodies.push(Bodies.fromVertices(socks[i].x, socks[i].y, socks[i].getVerts(), { label: `Sock${i.toString()}` }));
+
+            // Constraint between sock and clothes line
+            let clWidth = 700 - 300; // TODO Should be fixed consts or some config file or something, not magic numbers. Just experimenting right now so who cares :D
+            let spacing = clWidth / socks.length;
+            let clStart = 0 - (clWidth / 2);
+
+            // TODO: Investigate how I managed to break the universe! For some reason some of the constrains on my socks cause the sock to spin infinitely until interacted with or they get bored!!
+
+            self.sockConstraints.push(Constraint.create({
+                bodyA: self.clothesLine,
+                bodyB: self.sockBodies[i],
+                damping: 0.5,
+                stiffness: 0.8,
+                length: 30,
+                pointA: { x: clStart + (i * spacing) + (spacing / 2), y: 0 },
+                pointB: { x: 0, y: -20 }
+            }));
+
+            // Create composite of sock and constraint so that we can remove the constraint later
+            self.sockComposites.push(
+                Composite.create({
+                    bodies: [self.sockBodies[i]],
+                    constraints: [self.sockConstraints[i]]
+                })
+            );
+            World.addComposite(self.world, self.sockComposites[i]);
+        }
 
         // Game controls
         self.controlInfo = {
@@ -111,7 +137,7 @@ var sock = new Sock(350, 200);
 
             for (let i = 0; i < pairs.length; i++) {
                 if (pairs[i].bodyA.label == "Ball" || pairs[i].bodyB.label == "Ball") {
-                    if (pairs[i].bodyA.label == "OrangeSock" || pairs[i].bodyB.label == "OrangeSock") {
+                    if (pairs[i].bodyA.label.substr(0, pairs[i].bodyA.label.length - 1) == "Sock" || pairs[i].bodyB.label.substr(0, pairs[i].bodyB.label.length - 1) == "Sock") {
                         console.log("Start: ", pairs[i].collision.penetration);
                     }
                 }
@@ -135,10 +161,9 @@ var sock = new Sock(350, 200);
 
             for (let i = 0; i < pairs.length; i++) {
                 if (pairs[i].bodyA.label == "Ball" || pairs[i].bodyB.label == "Ball") {
-                    if (pairs[i].bodyA.label == "OrangeSock" || pairs[i].bodyB.label == "OrangeSock") {
-                        if (Math.abs(pairs[i].collision.penetration.x) > 5) {
-                            //World.remove(self.sock1Constraint);
-                            self.sock1Constraint.stiffness = 0;
+                    if (pairs[i].bodyA.label.substr(0, pairs[i].bodyA.label.length - 1) == "Sock" || pairs[i].bodyB.label.substr(0, pairs[i].bodyB.label.length - 1) == "Sock") {
+                        if (Math.abs(pairs[i].collision.penetration.x) > 2) {
+                            Composite.remove(self.sockComposites[0], self.sockConstraints[0]);
                         }
                         console.log("End: ", pairs[i].collision.penetration);
                     }
@@ -324,9 +349,11 @@ var sock = new Sock(350, 200);
                     })();
 
 
-                    // TEMP TEST ONLY - DRAW SOCK
-                    sock.update(self.sockBody.position.x, self.sockBody.position.y, self.sockBody.angle);
-                    sock.render(p);
+                    // TEMP TEST ONLY - DRAW SOCKS
+                    for (let i = 0; i < socks.length; i++) {
+                        socks[i].update(self.sockBodies[i].position.x, self.sockBodies[i].position.y, self.sockBodies[i].angle);
+                        socks[i].render(p);
+                    }
                 };
             };
 
