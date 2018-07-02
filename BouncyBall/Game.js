@@ -25,6 +25,13 @@ var Game = Game || {};
 
 var verts;
 
+const STATE = {
+    PAUSE: 0,
+    PLAY: 1
+};
+
+var GAME_STATE = STATE.PLAY;
+
 (function (Game) {
     Game.BouncyBall = function () {
         let self = this;
@@ -144,6 +151,8 @@ var verts;
                 }
 
                 p.keyPressed = function () {
+                    console.log(`Key Code: ${p.keyCode}`);
+
                     switch (p.keyCode) {
                         case 37: // Left arrow
                             self.controlInfo.LR = true;
@@ -156,6 +165,10 @@ var verts;
                             break;
                         case 40:  // Down
                             self.controlInfo.DR = true;
+                            break;
+                        case 80:
+                            if (GAME_STATE == STATE.PLAY) GAME_STATE = STATE.PAUSE;
+                            else if (GAME_STATE == STATE.PAUSE) GAME_STATE = STATE.PLAY;
                             break;
                     }
                 }
@@ -191,7 +204,11 @@ var verts;
 
                 p.draw = function () {
                     // Begin engine data
-                    Engine.update(self.engine);
+                    // TEST: This should act as a "pause" mode. 
+                    // Pause does indeed work, but things like "apply force" still work, 
+                    // so need to make sure those event listeners do nothing when in pause mode to avoid weird behaviour.
+                    if (GAME_STATE == STATE.PLAY)
+                        Engine.update(self.engine);
 
                     p.background(self.bgColor);
 
@@ -200,15 +217,17 @@ var verts;
                         //Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
                     }
 
-                    if (self.ball1.speed < 30) {
-                        if (self.controlInfo.LR) // Left arrow
-                            Body.applyForce(self.ball1, self.ball1.position, Vector.create(-0.001, 0));
-                        if (self.controlInfo.UR) // Up
-                            Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, -0.001));
-                        if (self.controlInfo.RR) // Right
-                            Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
-                        if (self.controlInfo.DR)  // Down
-                            Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, 0.001));
+                    if (GAME_STATE == STATE.PLAY) {
+                        if (self.ball1.speed < 30) {
+                            if (self.controlInfo.LR) // Left arrow
+                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(-0.001, 0));
+                            if (self.controlInfo.UR) // Up
+                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, -0.001));
+                            if (self.controlInfo.RR) // Right
+                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(0.001, 0));
+                            if (self.controlInfo.DR)  // Down
+                                Body.applyForce(self.ball1, self.ball1.position, Vector.create(0, 0.001));
+                        }
                     }
 
                     p.fill(200);
